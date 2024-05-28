@@ -43,3 +43,6 @@ class NeuralNetwork(nn.Module):
 
 model = NeuralNetwork()
 model.to(device)
+
+lossfn = nn.CrossEntropyLoss()
+optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
