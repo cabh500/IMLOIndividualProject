@@ -36,7 +36,7 @@ class NeuralNetwork(nn.Module):
     def forward(self, x):
       x = F.relu(self.conv1(x))
       x = self.pool(x)
-      x = self.fc1(x.reshape(x.shape[0], -1))
+      x = F.relu(self.fc1(x.reshape(x.shape[0], -1)))
       x = self.fc2(x.reshape(x.shape[0], -1))
 
       return x
@@ -46,3 +46,47 @@ model.to(device)
 
 lossfn = nn.CrossEntropyLoss()
 optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
+def train(epoch):
+    model.train()
+    running_loss = 0.0
+    for index, data in enumerate(train_dataloaders):
+        inputs, labels = data[0].to(device), data[1].to(device)
+        # zero the parameter gradients
+        optimizer.zero_grad()
+
+        # forward + backward + optimize
+        outputs = model(inputs)
+        outputs.to(device)
+
+        loss = lossfn(outputs, labels)
+        loss.to(device)
+        loss.backward()
+        optimizer.step()
+
+def test_loop(dataloader, model, lossfn):
+  model.eval()
+  size = len(dataloader.dataset)
+  num_batches = len(dataloader)
+  test_loss, correct = 0, 0
+
+  with torch.no_grad():
+      for images, labels in dataloader:
+          pred = model(images)
+          test_loss += lossfn(pred, labels).item()
+          correct += (pred.argmax(1) == labels).type(torch.float).sum().item()
+
+  test_loss /= num_batches
+  correct /= size
+  accuracy = 100*correct
+  return accuracy
+
+num_epochs = 100
+
+for epoch in range(0, num_epochs):
+    train(epoch)
+    accuracy = test_loop(val_dataloaders, model, lossfn)
+    # print accuracies
+    print(f' Epoch: {epoch} | Accuracy on test data: {accuracy:.2f}%')
+
+print(f'Finished Training.')
