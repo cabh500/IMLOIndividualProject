@@ -15,15 +15,15 @@ flowers_transform =  transforms.Compose([
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
+#Dataset
 train_image_datasets = Flowers102(root=data_dir, split='train', download=True, transform=flowers_transform)
 val_image_datasets = Flowers102(root=data_dir, split='val', download=True, transform=flowers_transform)
 
+#Dataloaders
 train_dataloaders = torch.utils.data.DataLoader(train_image_datasets, batch_size=batch_size, shuffle=True, num_workers=4)
 val_dataloaders = torch.utils.data.DataLoader(val_image_datasets, batch_size=batch_size, shuffle=True, num_workers=4)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-print("device: ",device)
 
 class NeuralNetwork(nn.Module):
     def __init__(self):
@@ -55,13 +55,15 @@ def train(epoch):
         # zero the parameter gradients
         optimizer.zero_grad()
 
-        # forward + backward + optimize
+        # Applying the loss function, backward and step
         outputs = model(inputs)
         outputs.to(device)
 
         loss = lossfn(outputs, labels)
         loss.to(device)
+        #Deposits the loss pf each gradient w.r.t each parameter
         loss.backward()
+        #adjust the parameters by the gradients collected in the backward pass
         optimizer.step()
 
 def test_loop(dataloader, model, lossfn):
