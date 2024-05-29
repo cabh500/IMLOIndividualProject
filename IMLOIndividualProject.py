@@ -61,7 +61,7 @@ def train(epoch):
 
         loss = lossfn(outputs, labels)
         loss.to(device)
-        #Deposits the loss pf each gradient w.r.t each parameter
+        #Deposits the loss of each gradient w.r.t each parameter
         loss.backward()
         #adjust the parameters by the gradients collected in the backward pass
         optimizer.step()
